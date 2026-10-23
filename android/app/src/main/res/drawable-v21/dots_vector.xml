@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <group android:name="dots">
+
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M42,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
+
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M60,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
+
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M78,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
+
+    </group>
+</vector>
