@@ -8,15 +8,15 @@
     <group android:name="dots">
 
         <path
-            android:fillColor="#FFFFFF"
+            android:fillColor="#ffffff94"
             android:pathData="M42,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
 
         <path
-            android:fillColor="#FFFFFF"
+            android:fillColor="#ffffff94"
             android:pathData="M60,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
 
         <path
-            android:fillColor="#FFFFFF"
+            android:fillColor="#ffffff94"
             android:pathData="M78,60 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
 
     </group>

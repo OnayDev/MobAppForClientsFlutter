@@ -15,7 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
 const kDemoUrl = 'https://dev.onayipoteka.kz/clientCabinet/main/';
-const allowedBaseUrl = 'https://example.kz/clientCabinet/';
+const allowedBaseUrl = 'https://dev.onayipoteka.kz/clientCabinet/';
 
 bool isAllowedUrl(String url) {
   final uri = Uri.tryParse(url);
@@ -140,6 +140,16 @@ class _WebViewPageState extends State<WebViewPage>
             await openAppSettings();
           }
         },
+      )
+      ..addJavaScriptChannel(
+        'AppReady',
+        onMessageReceived: (message) {
+          debugPrint('🌐 AppReady inside');
+          if (message.message == 'ready' && mounted) {
+            debugPrint('🌐 AppReady inside ready');
+            setState(() => _webViewReady = true);
+          }
+        },
       );
 
     if (_controller.platform is AndroidWebViewController) {
@@ -147,25 +157,53 @@ class _WebViewPageState extends State<WebViewPage>
           _controller.platform as AndroidWebViewController;
 
       androidController.setOnPlatformPermissionRequest((request) async {
-        final status = await Permission.camera.request();
+      var status = await Permission.camera.status;
 
-        if (status.isGranted) {
-          await request.grant();
-        } else {
-          await request.deny();
-        }
-      });
+      if (!status.isGranted) {
+        _suppressLock = true; // диалог вызовет inactive/paused
+        status = await Permission.camera.request();
+
+        // Страховка: если resumed не пришёл, не оставляем флаг навсегда
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _suppressLock = false;
+        });
+      }
+
+      if (status.isGranted) {
+        await request.grant();
+      } else {
+        await request.deny();
+      }
+    });
     }
 
     _initializeWebView();
   }
 
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.hidden ||
+  //       state == AppLifecycleState.paused) {
+  //     widget.authStore.lock();
+  //   }
+  // }
+
+  bool _suppressLock = false;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused) {
-      widget.authStore.lock();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        if (!_suppressLock) widget.authStore.lock();
+        break;
+      case AppLifecycleState.resumed:
+        // Вернулись из системного диалога/внешнего экрана
+        _suppressLock = false;
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        break;
     }
   }
 
@@ -295,9 +333,9 @@ class _WebViewPageState extends State<WebViewPage>
         }
       }
 
-      if (mounted) {
-        setState(() => _webViewReady = true);
-      }
+      // if (mounted) {
+      //   setState(() => _webViewReady = true);
+      // }
     } catch (e, stackTrace) {
       debugPrint('❌ WebView ERROR: $e');
       debugPrintStack(stackTrace: stackTrace);
